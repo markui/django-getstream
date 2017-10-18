@@ -16,9 +16,14 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
+
 from stream_twitter import views
+from stream_twitter.views import profile_feed
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^tweet/', login_required(views.TweetView.as_view()))
+    url(r'^tweet/$', login_required(views.TweetView.as_view(), login_url='/login/'), name='tweet'),
+    url(r'^login/$', LoginView.as_view(), name='login'),
+    url(r'^(?P<username>\w+)/feed/$', profile_feed, name='profile_feed'),
 ]
