@@ -21,7 +21,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Template Dir
 TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
 
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'ubd55o^wwmy=u$2anauw5h1*7*l31sd(dkd53q!t%f8#bu+#!f'
 
@@ -47,9 +46,10 @@ INSTALLED_APPS = [
     'stream_twitter'
 ]
 
-STREAM_API_KEY = 'sffx9w97rvwe'
-STREAM_API_SECRET = 'sq9jfpdfdq885prewahedce75qx4dp9mnram76e9r68kjxgue7tm9eva8nnm793s'
-
+# GetStream settings
+STREAM_API_KEY = 'ztxgyzh4ftqb'
+STREAM_API_SECRET = '64uyccwhbxx3y9r67jqccrhc7sbw843hw4y436ry8f4qrqwbzqrry3xxsbftxmkv'
+# STREAM_NEWS_FEEDS = dict(flat='flat')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -116,7 +116,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Seoul'
 
 USE_I18N = True
 
