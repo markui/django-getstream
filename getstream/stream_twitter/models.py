@@ -1,6 +1,7 @@
 from django.contrib import auth
 from django.db import models
 from django.db.models.signals import post_save, post_delete
+from django.utils.text import slugify
 from stream_django import activity
 from stream_django.feed_manager import feed_manager
 
@@ -15,9 +16,24 @@ class Tweet(activity.Activity, models.Model):
     def __str__(self):
         return self.text
 
+    # hashtag(#) 있는 tweet 단어들 parsing 하기
+    def parse_hashtags(self):
+        return [slugify(i) for i in self.text.split() if i.startswith('#')]
+
+    # 필수!: activity의 object 목적어 정의
     @property
     def activity_object_attr(self):
         return self
+
+    # sends a copy of an activity to many feeds(target feed)
+    @property
+    def activity_notify(self):
+        # 해당 hashtag 키워드의 피드(e.g. hashtag:패션)
+        #
+        target_feed = []
+        for hashtag in self.parse_hashtags():
+            target_feed.append(feed_manager.get_feed('hashtag', hashtag))
+        return target_feed
 
 
 class Follow(models.Model):

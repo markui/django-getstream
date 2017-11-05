@@ -70,6 +70,8 @@ class FollowView(CreateView):
 
 def timeline(request):
     """
+    유저가 팔로우하는 다른 유저의 activity들을 보여주는
+    타임라인(뉴스피드) 기능
     """
     enricher = Enrich()
     feed = feed_manager.get_news_feeds(request.user.id)['timeline']
@@ -79,3 +81,18 @@ def timeline(request):
         'activities': activities
     }
     return render(request, 'stream_twitter/timeline.html', context)
+
+
+def hashtag(request, hashtag):
+    """
+    특정 해쉬태그를 포함한
+    트윗들을 보여주는 기능
+    """
+    enricher = Enrich()
+    feed = feed_manager.get_feed('hashtag', hashtag)
+    activities = feed.get(limit=5)['results']
+    enricher.enrich_activities(activities)
+    context = {
+        'activities': activities
+    }
+    return render(request, 'stream_twitter/hashtag.html', context)

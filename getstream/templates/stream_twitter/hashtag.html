@@ -1,0 +1,6 @@
+{% load activity_tags %}
+
+<h1>#해쉬태그 트윗들</h1>
+{% for activity in activities %}
+    <p>{% render_activity activity %}</p>
+{% endfor %}
