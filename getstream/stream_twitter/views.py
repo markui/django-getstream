@@ -1,12 +1,11 @@
+from django.contrib.auth import get_user_model
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.generic.edit import CreateView
-from django.contrib.auth import get_user_model
-
-from .models import Tweet, Follow
-
 from stream_django.enrich import Enrich
 from stream_django.feed_manager import feed_manager
+
+from .models import Tweet, Follow
 
 User = get_user_model()
 
@@ -70,17 +69,49 @@ class FollowView(CreateView):
 
 def timeline(request):
     """
-    유저가 팔로우하는 다른 유저의 activity들을 보여주는
+    유저(request.user)가 팔로우하는 다른 유저의 activity들을 보여주는
     타임라인(뉴스피드) 기능
     """
     enricher = Enrich()
     feed = feed_manager.get_news_feeds(request.user.id)['timeline']
-    activities = feed.get(limit=25)['results']
+    activities = feed.get(limit=30)['results']
+    print(feed.get())
+    print(activities)
     enricher.enrich_activities(activities)
     context = {
         'activities': activities
     }
     return render(request, 'stream_twitter/timeline.html', context)
+
+
+def notification(request):
+    """
+    유저(request.user)의 notification feed를 보여주는 기능
+    :param request:
+    :return:
+    """
+    enricher = Enrich()
+    feed = feed_manager.get_notification_feed(request.user.id)
+    # mark_seen, mark_read의 개념 True(전체) 혹은 List[activity_id_1, activity_id_2, ...]
+    feed.get(mark_seen=True)
+    feed_contents = feed.get(limit=30)['results']
+    activities = feed_contents[0]['activities']
+    print(feed.get())
+    print(feed_contents)
+    print(activities)
+    enricher.enrich_activities(activities)
+
+    # realtime notification 위해서
+    # read + write token for feed user:1
+    token = feed.token
+    # readonly token
+    # readonly_token = feed.get_readonly_token()
+
+    context = {
+        'activities': activities,
+        'token': token,
+    }
+    return render(request, 'stream_twitter/notification.html', context)
 
 
 def hashtag(request, hashtag):

@@ -1,12 +1,15 @@
-from django.contrib import auth
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models.signals import post_save, post_delete
 from django.utils.text import slugify
 from stream_django import activity
 from stream_django.feed_manager import feed_manager
 
+User = get_user_model()
+
 
 # 3가지 model: users, tweets, and follows
+
 
 class Tweet(activity.Activity, models.Model):
     user = models.ForeignKey('auth.User', related_name='tweets')
@@ -16,9 +19,14 @@ class Tweet(activity.Activity, models.Model):
     def __str__(self):
         return self.text
 
-    # hashtag(#) 있는 tweet 단어들 parsing 하기
+    # tweet에 있는 hashtag(#) 단어들 parsing 하기
     def parse_hashtags(self):
         return [slugify(i) for i in self.text.split() if i.startswith('#')]
+
+    # tweet에 있는 mention(@)된 username들을 parsing 하기
+    def parse_mentions(self):
+        mentions = [slugify(i) for i in self.text.split() if i.startswith('@')]
+        return User.objects.filter(username__in=mentions)
 
     # 필수!: activity의 object 목적어 정의
     @property
@@ -28,11 +36,18 @@ class Tweet(activity.Activity, models.Model):
     # sends a copy of an activity to many feeds(target feed)
     @property
     def activity_notify(self):
-        # 해당 hashtag 키워드의 피드(e.g. hashtag:패션)
-        #
         target_feed = []
-        for hashtag in self.parse_hashtags():
-            target_feed.append(feed_manager.get_feed('hashtag', hashtag))
+        # 해당 hashtag(#) 키워드의 피드(e.g. hashtag:패션)에 activity 추가
+        for keyword in self.parse_hashtags():
+            target_feed.append(feed_manager.get_feed('hashtag', keyword))
+        for user in self.parse_mentions():
+            # mention(@)한 유저의 타임라인 피드에 activity 추가
+            # get_news_feeds는 기본으로 인자로 받은 user의 1) timeline, 2) timeline_aggregated
+            # 피드를 가져옴
+            target_feed.append(feed_manager.get_news_feeds(user.id)['timeline'])
+            # mention(@)한 유저의 notification 피드에 activity 추가
+            target_feed.append(feed_manager.get_notification_feed(user.id))
+
         return target_feed
 
 

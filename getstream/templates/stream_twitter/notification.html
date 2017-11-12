@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+{% load activity_tags %}
+<h1>나의 알림</h1>
+{% for activity in activities %}
+<p>{% render_activity activity %}</p>
+{% endfor %}
+
+<script src="{% static 'js/stream.js' %}"></script>
+<script>
+    var client = stream.connect('ztxgyzh4ftqb', null, '30816');
+    var notification = client.feed('notification', '1', '{{ token }}');
+
+    function callback(data) {
+        console.log(data);
+    }
+
+    function successCallback() {
+        console.log('now listening to changes in realtime');
+    }
+
+    function failCallback() {
+        alert('something went wrong, check the console logs');
+        console.log(data);
+    }
+
+    notification.subscribe(callback).then(successCallback, failCallback);
+</script>
+{% endblock %}

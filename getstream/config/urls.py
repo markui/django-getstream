@@ -19,7 +19,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 
 from stream_twitter import views
-from stream_twitter.views import profile_feed, FollowView, timeline, hashtag
+from stream_twitter.views import profile_feed, FollowView, timeline, hashtag, notification
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
@@ -28,5 +28,6 @@ urlpatterns = [
     url(r'^(?P<username>\w+)/feed/$', profile_feed, name='profile_feed'),
     url(r'^follow/$', FollowView.as_view(), name='follow'),
     url(r'^timeline/$', timeline, name='timeline'),
+    url(r'^notification/$', notification, name='notification'),
     url(r'^(?P<hashtag>\w+)/hashtag/$', hashtag, name='hashtag')
 ]
